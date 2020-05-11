@@ -1,0 +1,21 @@
+{
+  "name": "project-0",
+  "version": "1.0.0",
+  "description": "project 0 using npm and express",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "nodemon --exec ts-node src/index.ts",
+    "test": "echo \"testing not configured\" && exit 1"
+  },
+  "author": "Liam Allard",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/express": "^4.17.6",
+    "nodemon": "^2.0.3",
+    "ts-node": "^8.10.1",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
