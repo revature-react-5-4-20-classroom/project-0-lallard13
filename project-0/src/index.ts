@@ -1,4 +1,6 @@
-import * as Models from './models';
+import { User } from './models/User';
+import { Role } from './models/Role';
+import { Reimbursement, ReimbursementStatus, ReimbursementType} from './models/Reimbursement';
 import express from 'express';
 import bodyparser from 'body-parser';
 import {Application, Request, Response} from 'express';
@@ -11,18 +13,27 @@ app.use(bodyparser.json());
 // login
 app.post('/login', (req: Request, res: Response) => {
     // lets user log in
+    let {username, password} = req.body;
+    if(typeof(username) === 'string' && typeof(password === 'string')) {
+        // call logIn function, res.json(returned user)
+    } else {
+        res.sendStatus(400).send('Invalid Credentials');
+    }
 })
 
 // find users
 app.get('/users', (req: Request, res: Response) => {
     // responds with users
     // allowed roles: finance-manager
+    // call getAllUsers function
 })
 
 // find users by ID
 app.get('/users/:id', (req: Request, res: Response) => {
     // responds with users
     // allowed roles: finance-manager, or if id matches id of current user
+    const id = +req.params.id;
+    // call getUserById function, res.json(returned user)
 })
 
 // update user
@@ -59,3 +70,18 @@ app.patch('/reimbursements', (req: Request, res: Response) => {
     // Response: Reimbursement
     // allowed roles: finance-manager
 })
+
+// functions for editing/retrieving users and reimbursements
+
+// function logIn(username: string, password: string) : User {
+//     const validCredentials = true; // check database for username and password
+//     if(validCredentials) {
+//         return someUser;
+//     } else {
+//         throw new Error('Invalid Credentials');
+//     }
+// }
+
+// function getAllUsers() : User[] {
+//     return someUser; // check database for all users
+// }
