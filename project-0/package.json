@@ -11,11 +11,15 @@
   "license": "ISC",
   "devDependencies": {
     "@types/express": "^4.17.6",
+    "@types/express-session": "^1.17.0",
+    "@types/pg": "^7.14.3",
     "nodemon": "^2.0.3",
     "ts-node": "^8.10.1",
     "typescript": "^3.8.3"
   },
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "pg": "^8.2.1"
   }
 }
