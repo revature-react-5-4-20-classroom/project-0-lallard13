@@ -79,7 +79,7 @@ export async function updateUser(userToUpdate : User) : Promise<User> {
     let client : PoolClient = await connectionPool.connect();
     try {
         // first, make sure the user actually exists
-        const userResult : User = await getUserById(userToUpdate.userId); // throws an error if user does not exist
+        const currentUser : User = await getUserById(userToUpdate.userId); // throws an error if user does not exist
         // next, check if the role is one of the fields to be updated
         let roleId : number = null;
         if(userToUpdate.role) {
@@ -87,35 +87,28 @@ export async function updateUser(userToUpdate : User) : Promise<User> {
             // find the correct role id
             const roleIdResult : QueryResult = await client.query(`
                 SELECT id FROM project_0.roles WHERE role_name = $1`,[newRole]);
-            roleId = roleIdResult.rows[0];
+            roleId = roleIdResult.rows[0].id;
         }
         // get the current role id
         let currentRoleId : number;
-        const currentRole : string = userResult.role;
+        const currentRole : string = currentUser.role;
         const currentRoleIdResult : QueryResult = await client.query(`
-        SELECT id FROM project_0.roles WHERE role_name = $1`,[currentRole]);
+            SELECT id FROM project_0.roles WHERE role_name = $1`,[currentRole]);
         currentRoleId = currentRoleIdResult.rows[0].id;
-        // now create an array of fields to update:
-        const fieldsToUpdate : string[] = [];
+        // Compare current user with submitted user object to create an array of fields
+        const fieldsToUpdate = [];
         for(let field in userToUpdate) {
-            fieldsToUpdate.push(userToUpdate[field].toString());
-        }
-        if(roleId) {
-            fieldsToUpdate.pop(); // remove the role name
-            fieldsToUpdate.push(roleId.toString());
-        }
-        // create an array representing the current user in the database
-        const currentFields : string[] = [];
-        for(let field in userResult) {
-            currentFields.push(userResult[field].toString());
-        }
-        currentFields.pop();
-        currentFields.push(currentRoleId.toString());
-        // compare the two arrays to create the fields for the query
-        for(let i = 0; i < fieldsToUpdate.length; i++) {
-            if(!fieldsToUpdate[i]) {
-                fieldsToUpdate[i] = currentFields[i]
+            if(!userToUpdate[field]) {
+                userToUpdate[field] = currentUser[field];
             }
+            fieldsToUpdate.push(userToUpdate[field])
+        }
+        fieldsToUpdate.pop();
+        if(roleId) {
+            // remove last element, replace it with role id
+            fieldsToUpdate.push(roleId);
+        } else {
+            fieldsToUpdate.push(currentRoleId);
         }
         // now we can make our query
         await client.query(`

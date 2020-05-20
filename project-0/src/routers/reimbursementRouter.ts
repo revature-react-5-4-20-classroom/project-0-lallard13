@@ -63,7 +63,6 @@ reimbursementRouter.patch('/', async (req: Request, res: Response, next: NextFun
     // Request: Reimbursement
     // Response: Reimbursement
     // allowed roles: finance-manager
-    console.log('test');
     let reimbToUpdate : Reimbursement = req.body;
     if(!reimbToUpdate.reimbursementId){
         res.status(400).send('Invalid Reimbursement id');

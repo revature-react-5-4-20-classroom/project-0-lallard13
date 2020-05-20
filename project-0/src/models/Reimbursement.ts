@@ -1,5 +1,5 @@
 // the Reimbursement model represents a single reimbursement that an employee would submit
-export class Reimbursement {
+export class Reimbursement { // comments are constraints within the database
     reimbursementId: number; // primary key
 	author: string;  // foreign key -> User, not null
 	amount: number;  // not null

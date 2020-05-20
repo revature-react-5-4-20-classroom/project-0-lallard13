@@ -14,7 +14,7 @@ export function authRoleFactory(roles : string[]) {
             if(approvedRole.length > 0) {
                 next();
             } else {
-                res.status(403).send(`Access for role : ${req.session.user.role} denied.`)
+                res.status(401).json({ message : 'The incoming token has expired' });
             }
         }
     }

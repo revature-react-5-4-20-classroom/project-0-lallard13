@@ -8,6 +8,7 @@ import { sessionMiddleware } from './middleware/sessionMiddleware';
 import { connectionPool } from './repository';
 import { PoolClient, QueryResult } from 'pg';
 import { getUserByUsernamePassword } from './repository/userDataAccess';
+import { authRoleFactory } from './middleware/authMiddleware';
 
 const app: Application = express();
 
@@ -24,7 +25,7 @@ app.post('/login', async (req: Request, res: Response, next:NextFunction) => {
     // lets user log in
     const {username, password} = req.body;
     if(!username || !password) {
-        res.status(400).send('Please include all required fields');
+        res.status(400).json({ message: "Invalid Credentials" });
     } else {
         try {
             const user = await getUserByUsernamePassword(username, password);
@@ -36,6 +37,9 @@ app.post('/login', async (req: Request, res: Response, next:NextFunction) => {
         }
     }
 })
+
+// require login
+app.use(authRoleFactory(['employee','finance-manager','admin']))
 
 // endpoints to /users
 app.use('/users',userRouter);

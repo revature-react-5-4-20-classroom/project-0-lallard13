@@ -2,21 +2,9 @@ import { Reimbursement } from '../models/Reimbursement'
 import { PoolClient, QueryResult } from 'pg'
 import { connectionPool } from '.'
 
-// sorts an array of reimbursements by date submitted
-// function sortByTime(reimbursements : Reimbursement[]) : Reimbursement[] {
-//     reimbursements.sort((a, b) => {
-//         let aDate = new Date(a.dateSubmitted);
-//         let bDate = new Date(b.dateSubmitted);
-//         let aTime = aDate.getTime();
-//         let bTime = bDate.getTime();
-//         return aTime - bTime;
-//     });
-//     return reimbursements;
-// }
-
 // functions for accessing reimbursements from the database
 
-// search for reimbursement by reimbursement id (not used in endpoints)
+// search for reimbursement by reimbursement id (not used directly)
 async function getReimbursementById(id : number) : Promise<Reimbursement> {
     let client : PoolClient = await connectionPool.connect();
     // find a single reimbursement by its id
@@ -49,7 +37,7 @@ async function getReimbursementById(id : number) : Promise<Reimbursement> {
 }
 
 // search for reimbursements by status id
-export async function getReimbursementsByStatus(statusId) : Promise<Reimbursement[]> {
+export async function getReimbursementsByStatus(statusId : number) : Promise<Reimbursement[]> {
     let client : PoolClient = await connectionPool.connect();
     // find every reimbursement with the given status id
     try {
@@ -71,7 +59,6 @@ export async function getReimbursementsByStatus(statusId) : Promise<Reimbursemen
         let reimbursements : Reimbursement[] = resultRows.map((reimb) => {
             return new Reimbursement(reimb.id, reimb.author_name, reimb.amount, reimb.date_submitted, reimb.date_resolved, reimb.description, reimb.resolver_name, reimb.status, reimb.type)
         });
-        // sort by date submitted
         //reimbursements = sortByTime(reimbursements);
         console.log(reimbursements);
         return reimbursements;
@@ -83,7 +70,7 @@ export async function getReimbursementsByStatus(statusId) : Promise<Reimbursemen
 }
 
 // search for reimbursements by user id
-export async function getReimbursementsByUser(userId) : Promise<Reimbursement[]> {
+export async function getReimbursementsByUser(userId : number) : Promise<Reimbursement[]> {
     let client : PoolClient = await connectionPool.connect();
     // find every reimbursement with the given user id
     try {
@@ -189,9 +176,14 @@ async function convertReimbToArray(reimb : Reimbursement) : Promise<any[]> {
         SELECT id FROM project_0.users WHERE username = $1`,[reimb.author]);
     let authorId : number = authorResult.rows[0].id;
     // resolver
-    let resolverResult : QueryResult = await client.query(`
+    let resolverId : number;
+    if(reimb.resolver) {
+        let resolverResult : QueryResult = await client.query(`
         SELECT id FROM project_0.users WHERE username = $1`,[reimb.resolver]);
-    let resolverId : number = resolverResult.rows[0].id;
+        resolverId  = resolverResult.rows[0].id;
+    } else {
+        resolverId = null;
+    }
     // status
     let statusResult : QueryResult = await client.query(`
         SELECT id FROM project_0.reimbursement_status WHERE status = $1`,[reimb.status]);
@@ -199,7 +191,7 @@ async function convertReimbToArray(reimb : Reimbursement) : Promise<any[]> {
     // type
     let typeResult : QueryResult = await client.query(`
         SELECT id FROM project_0.reimbursement_type WHERE type = $1`,[reimb.type]);
-    let typeId : number = statusResult.rows[0].id;
+    let typeId : number = typeResult.rows[0].id;
 
     return [reimb.reimbursementId,authorId,reimb.amount,reimb.dateSubmitted,reimb.dateResolved,reimb.description,resolverId,statusId,typeId];
 

@@ -2,6 +2,7 @@
 #export NAME=value
 #process.env['NAME]=value
 
+export TS_NODE_COMPILER_OPTIONS='{"esModuleInterop":true}'
 export PG_HOST=database-1.c1e3kb2m3wws.us-west-1.rds.amazonaws.com
 export PG_USER=postgres
 export PG_PASSWORD=yesyeshEllo?
