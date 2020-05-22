@@ -13,7 +13,7 @@ userRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) =
     const id = +req.params.id;
     if (isNaN(id)) {
         res.status(400).send('ID field must be an integer');
-    } else if (id !== req.session.user.userId && req.session.user.role !== 'finance-manager') {
+    } else if (req.session && (id !== req.session.user.userId && req.session.user.role !== 'finance-manager')) {
         res.status(403).send('Not authorized');
     } else {
         try {

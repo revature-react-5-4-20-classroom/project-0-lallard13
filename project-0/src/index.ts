@@ -29,8 +29,12 @@ app.post('/login', async (req: Request, res: Response, next:NextFunction) => {
     } else {
         try {
             const user = await getUserByUsernamePassword(username, password);
-            req.session.user = user;
-            res.json(user)
+            if(req.session){
+                req.session.user = user;
+                res.json(user)
+            } else {
+                res.sendStatus(400);
+            }
     
         } catch(e) {
             next(e);
