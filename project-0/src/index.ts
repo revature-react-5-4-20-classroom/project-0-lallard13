@@ -12,6 +12,11 @@ import { authRoleFactory } from './middleware/authMiddleware';
 
 const app: Application = express();
 
+// Check if webhook works by pushing new endpoint:
+app.get('/new-endpoint', (req: Request, res: Response) => {
+    res.send('Webhooks worked!');
+})
+
 app.use(bodyParser.json());
 
 // session middleware for keeping track of session data
