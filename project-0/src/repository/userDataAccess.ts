@@ -75,7 +75,7 @@ export async function getAllUsers() : Promise<User[]> {
 }
 
 // update user
-export async function updateUser(userToUpdate : User) : Promise<User> {
+export async function updateUser(userToUpdate) : Promise<User> {
     let client : PoolClient = await connectionPool.connect();
     try {
         // first, make sure the user actually exists
@@ -97,7 +97,7 @@ export async function updateUser(userToUpdate : User) : Promise<User> {
         currentRoleId = currentRoleIdResult.rows[0].id;
         // Compare current user with submitted user object to create an array of fields
         const fieldsToUpdate = [];
-        for(let field in userToUpdate) {
+        for(let field in currentUser) {
             if(!userToUpdate[field]) {
                 userToUpdate[field] = currentUser[field];
             }

@@ -104,11 +104,12 @@ export async function getReimbursementsByUser(userId : number) : Promise<Reimbur
 }
 
 // for submitting a new reimbursement request
-export async function submitReimbursement(newReimb : Reimbursement) : Promise<Reimbursement> {
+// Note: included username as a seperate parameter so session user name can be passed in automatically
+export async function submitReimbursement(newReimb, username : string) : Promise<Reimbursement> {
     let client : PoolClient = await connectionPool.connect();
     try {
         // get ids for author and type
-        const authorResult = await client.query('SELECT id FROM project_0.users WHERE username = $1',[newReimb.author]);
+        const authorResult = await client.query('SELECT id FROM project_0.users WHERE username = $1',[username]);
         if(!authorResult.rows[0]) {
             throw new Error('Invalid user ID');
         }
@@ -118,10 +119,14 @@ export async function submitReimbursement(newReimb : Reimbursement) : Promise<Re
         }
         let [authorId, typeId] = [authorResult, typeResult].map((result)=>{return result.rows[0].id});
 
+        // get current date
+        let today : Date = new Date();
+        let date = `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`;
+
         // submit reimbursement to database
         await client.query(`
             INSERT INTO project_0.reimbursements (author, amount, description, date_submitted, type)
-            VALUES ($1, $2, $3, $4, $5)`,[authorId,newReimb.amount,newReimb.description,newReimb.dateSubmitted,typeId]);
+            VALUES ($1, $2, $3, $4, $5)`,[authorId,newReimb.amount,newReimb.description,date,typeId]);
         // get the max id to return the newly added reimbursement
         let submissionId : QueryResult = await client.query(`SELECT MAX(id) FROM project_0.reimbursements`);
         let submissionResult = await getReimbursementById(submissionId.rows[0].max);
@@ -134,13 +139,13 @@ export async function submitReimbursement(newReimb : Reimbursement) : Promise<Re
     }
 }
 
-export async function updateReimbursement(reimbToUpdate : Reimbursement) : Promise<Reimbursement> {
+export async function updateReimbursement(reimbToUpdate) : Promise<Reimbursement> {
     let client : PoolClient = await connectionPool.connect();
     try {
         // first, get the current reimbursement in the DB
         const currentReimb = await getReimbursementById(reimbToUpdate.reimbursementId);
         // replace any empty fields with the fields of the current entry
-        for(let field in reimbToUpdate) {
+        for(let field in currentReimb) {
             if(!reimbToUpdate[field]) {
                 reimbToUpdate[field] = currentReimb[field];
             }

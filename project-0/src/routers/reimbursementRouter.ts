@@ -10,9 +10,9 @@ export const reimbursementRouter : Router = express.Router();
 reimbursementRouter.post('/', async (req: Request, res: Response, next: NextFunction) => {
     // Request: the reimbursementId should be 0
     // Response: Status Code 201 CREATED
-    const newReimb : Reimbursement = req.body;
+    const newReimb = req.body;
     try{
-        const returnedReimb : Reimbursement = await submitReimbursement(newReimb);
+        const returnedReimb : Reimbursement = await submitReimbursement(newReimb, req.session.user.username);
         res.status(201).json(returnedReimb);
     } catch(e) {
         next(e);
@@ -63,7 +63,7 @@ reimbursementRouter.patch('/', async (req: Request, res: Response, next: NextFun
     // Request: Reimbursement
     // Response: Reimbursement
     // allowed roles: finance-manager
-    let reimbToUpdate : Reimbursement = req.body;
+    let reimbToUpdate  = req.body;
     if(!reimbToUpdate.reimbursementId){
         res.status(400).send('Invalid Reimbursement id');
     }
