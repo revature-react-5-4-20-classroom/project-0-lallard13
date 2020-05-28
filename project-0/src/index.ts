@@ -9,6 +9,7 @@ import { connectionPool } from './repository';
 import { PoolClient, QueryResult } from 'pg';
 import { getUserByUsernamePassword } from './repository/userDataAccess';
 import { authRoleFactory } from './middleware/authMiddleware';
+import { corsFilter } from './middleware/corsFilter';
 
 const app: Application = express();
 
@@ -16,6 +17,8 @@ const app: Application = express();
 app.get('/new-endpoint', (req: Request, res: Response) => {
     res.send('Webhooks worked!');
 })
+
+app.use(corsFilter);
 
 app.use(bodyParser.json());
 
