@@ -7,22 +7,27 @@ import { connectionPool } from '.'
 // accessing users by username and password
 export async function getUserByUsernamePassword(username: string, password: string) : Promise<User> {
     // connect to database
+    console.log("before pool client");
     let client : PoolClient = await connectionPool.connect();
+    console.log("connecting to get user")
     try {
         const result : QueryResult = await client.query(`
             SELECT users.id, username, password, first_name, last_name, email, role_name FROM project_0.users
             INNER JOIN project_0.roles ON users.role_id = roles.id
             WHERE username = $1 AND password = $2`,[username, password]);
         // Creates array (size 1) of matching user objects (perhaps use DTO if there's time)
+        console.log("Got query result");
         const matchingUsers = result.rows.map((u) => {
             return new User(u.id, u.username, u.password, u.first_name, u.last_name, u.email, u.role_name);
         });
         if(matchingUsers.length > 0) {
+            console.log("trying to return");
             return matchingUsers[0];
         } else {
             throw new Error('Username/password combination not found');
         }
     } catch(e) {
+        console.log("error");
         throw new Error(`Failed to validate user with Database: ${e.message}`);
     } finally {
         client && client.release();

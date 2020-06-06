@@ -176,28 +176,33 @@ export async function updateReimbursement(reimbToUpdate) : Promise<Reimbursement
 // for converting from JS object to an array with fields for a database object
 async function convertReimbToArray(reimb : Reimbursement) : Promise<any[]> {
     let client : PoolClient = await connectionPool.connect();
-    // author
-    let authorResult : QueryResult = await client.query(`
-        SELECT id FROM project_0.users WHERE username = $1`,[reimb.author]);
-    let authorId : number = authorResult.rows[0].id;
-    // resolver
-    let resolverId : number;
-    if(reimb.resolver) {
-        let resolverResult : QueryResult = await client.query(`
-        SELECT id FROM project_0.users WHERE username = $1`,[reimb.resolver]);
-        resolverId  = resolverResult.rows[0].id;
-    } else {
-        resolverId = null;
+    try{
+        // author
+        let authorResult : QueryResult = await client.query(`
+            SELECT id FROM project_0.users WHERE username = $1`,[reimb.author]);
+        let authorId : number = authorResult.rows[0].id;
+        // resolver
+        let resolverId : number;
+        if(reimb.resolver) {
+            let resolverResult : QueryResult = await client.query(`
+            SELECT id FROM project_0.users WHERE username = $1`,[reimb.resolver]);
+            resolverId  = resolverResult.rows[0].id;
+        } else {
+            resolverId = null;
+        }
+        // status
+        let statusResult : QueryResult = await client.query(`
+            SELECT id FROM project_0.reimbursement_status WHERE status = $1`,[reimb.status]);
+        let statusId : number = statusResult.rows[0].id;
+        // type
+        let typeResult : QueryResult = await client.query(`
+            SELECT id FROM project_0.reimbursement_type WHERE type = $1`,[reimb.type]);
+        let typeId : number = typeResult.rows[0].id;
+
+        return [reimb.reimbursementId,authorId,reimb.amount,reimb.dateSubmitted,reimb.dateResolved,reimb.description,resolverId,statusId,typeId];
+    } catch(e) {
+        throw new Error(`Failed to access database: ${e.message}`);
+    } finally {
+        client && client.release();
     }
-    // status
-    let statusResult : QueryResult = await client.query(`
-        SELECT id FROM project_0.reimbursement_status WHERE status = $1`,[reimb.status]);
-    let statusId : number = statusResult.rows[0].id;
-    // type
-    let typeResult : QueryResult = await client.query(`
-        SELECT id FROM project_0.reimbursement_type WHERE type = $1`,[reimb.type]);
-    let typeId : number = typeResult.rows[0].id;
-
-    return [reimb.reimbursementId,authorId,reimb.amount,reimb.dateSubmitted,reimb.dateResolved,reimb.description,resolverId,statusId,typeId];
-
 }

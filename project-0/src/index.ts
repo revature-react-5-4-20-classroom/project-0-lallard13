@@ -32,12 +32,16 @@ app.use(loggingMiddleware);
 // login endpoint
 app.post('/login', async (req: Request, res: Response, next:NextFunction) => {
     // lets user log in
+    console.log('In login');
+    console.log(req.body);
     const {username, password} = req.body;
     if(!username || !password) {
         res.status(400).json({ message: "Invalid Credentials" });
     } else {
         try {
+            console.log("I am here");
             const user = await getUserByUsernamePassword(username, password);
+            console.log("but not here");
             if(req.session){
                 req.session.user = user;
                 res.json(user)
@@ -46,7 +50,7 @@ app.post('/login', async (req: Request, res: Response, next:NextFunction) => {
             }
     
         } catch(e) {
-            next(e);
+            res.status(401).json({message: e.message});
         }
     }
 })
