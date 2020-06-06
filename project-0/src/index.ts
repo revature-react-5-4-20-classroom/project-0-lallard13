@@ -12,6 +12,7 @@ import { authRoleFactory } from './middleware/authMiddleware';
 import { corsFilter } from './middleware/corsFilter';
 
 const app: Application = express();
+//
 
 // Check if webhook works by pushing new endpoint:
 app.get('/new-endpoint', (req: Request, res: Response) => {
