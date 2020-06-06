@@ -3,8 +3,6 @@ import { authRoleFactory } from '../middleware/authMiddleware';
 import { User } from '../models/User'
 import { getAllUsers, getUserById, updateUser } from '../repository/userDataAccess';
 
-// making an update
-
 // router for all /users requests
 export const userRouter : Router = express.Router();
 
