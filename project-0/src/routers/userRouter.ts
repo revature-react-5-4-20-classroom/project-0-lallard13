@@ -26,7 +26,7 @@ userRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) =
 });
 
 // find all users
-userRouter.get('/', authRoleFactory(['finance-manager']));
+userRouter.get('/', authRoleFactory(['finance-manager','admin']));
 userRouter.get('/', async (req: Request, res: Response, next : NextFunction) => {
     // responds with users
     // allowed roles: finance-manager
@@ -39,17 +39,20 @@ userRouter.get('/', async (req: Request, res: Response, next : NextFunction) => 
 });
 
 // update user
-userRouter.use(authRoleFactory(['admin']));
 userRouter.patch('/', async (req: Request, res: Response, next: NextFunction) => {
     // userId as well as all fields to update must be present in request
     // any fields left undefined will not be updated
     // returns with user
     // allowed roles: admin
     const userToUpdate : User = req.body;
-    try {
-        const updatedUser : User = await updateUser(userToUpdate);
-        res.json(updatedUser);
-    } catch(e) {
-        next(e);
+    if (req.session && (userToUpdate.userId !== req.session.user.userId && req.session.user.role !== 'admin')) {
+        res.status(403).send('Not authorized');
+    } else {
+        try {
+            const updatedUser : User = await updateUser(userToUpdate);
+            res.json(updatedUser);
+        } catch(e) {
+            next(e);
+        }
     }
 });
